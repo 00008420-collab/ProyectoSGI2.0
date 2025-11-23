@@ -1,28 +1,31 @@
-# app.py
+# app.py (DEBUG)
 import streamlit as st
-from db import get_table_names
-st.set_page_config(page_title='GAPC - Sistema', layout='wide')
-st.title('GAPC — Sistema de Gestión')
+st.set_page_config(page_title="Debug GAPC", layout="centered")
+st.title("Debug — Streamlit app running ✅")
 
-menu = ["Inicio", "Ayuda"]
-choice = st.sidebar.selectbox("Menú", menu)
+import os
+st.subheader("Check environment")
+for k in ["DB_HOST","DB_NAME","DB_USER","DB_PASS","DB_PORT","AUTH_MODE"]:
+    st.write(k, "=", "✓" if os.getenv(k) else "— no definida —")
 
-if choice == "Inicio":
-    st.header("Resumen")
-    try:
-        tablas = get_table_names()
-        st.write("Tablas detectadas en la base de datos:", tablas)
-    except Exception as e:
-        st.error("No se pudo conectar a la base de datos.")
-        st.text(str(e))
+st.subheader("Check Python modules")
+errors = []
+try:
+    import sqlalchemy
+except Exception as e:
+    errors.append(f"sqlalchemy: {e}")
+try:
+    import pymysql
+except Exception as e:
+    errors.append(f"pymysql: {e}")
+try:
+    import pandas
+except Exception as e:
+    errors.append(f"pandas: {e}")
 
-elif choice == "Ayuda":
-    st.header("Instrucciones rápidas")
-    st.markdown("""
-1. Crea un servicio MySQL en Clever Cloud e importa tus tablas.
-2. Sube este proyecto a GitHub.
-3. En Streamlit Cloud crea una app conectando tu repo.
-4. Agrega los secrets (DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME).
-""")
-    st.markdown("El ZIP y el PDF del proyecto pueden subirse al repo si necesitas documentación.")
-
+if not errors:
+    st.success("Módulos esenciales importados OK")
+else:
+    st.error("Error importando módulos (ver abajo)")
+    for e in errors:
+        st.write(e)
