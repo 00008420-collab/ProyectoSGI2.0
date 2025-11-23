@@ -1,26 +1,28 @@
 # app.py
 import streamlit as st
-from modulos.venta import mostrar_venta
-from modulos.login import login
+from db import get_table_names
+st.set_page_config(page_title='GAPC - Sistema', layout='wide')
+st.title('GAPC — Sistema de Gestión')
 
-# Comprobamos si la sesión ya está iniciada 
-if "sesion_iniciada" in st.session_state and st.session_state["sesion_iniciada"]:
+menu = ["Inicio", "Ayuda"]
+choice = st.sidebar.selectbox("Menú", menu)
 
-    # Botón de logout en el menú lateral
-    if st.sidebar.button("Cerrar sesión"):
-        st.session_state["sesion_iniciada"] = False
-        st.rerun()  # ← Nueva forma de recargar la app
+if choice == "Inicio":
+    st.header("Resumen")
+    try:
+        tablas = get_table_names()
+        st.write("Tablas detectadas en la base de datos:", tablas)
+    except Exception as e:
+        st.error("No se pudo conectar a la base de datos.")
+        st.text(str(e))
 
-    # Mostrar el menú lateral
-    opciones = ["Ventas", "Otra opción"]
-    seleccion = st.sidebar.selectbox("Selecciona una opción", opciones)
+elif choice == "Ayuda":
+    st.header("Instrucciones rápidas")
+    st.markdown("""
+1. Crea un servicio MySQL en Clever Cloud e importa tus tablas.
+2. Sube este proyecto a GitHub.
+3. En Streamlit Cloud crea una app conectando tu repo.
+4. Agrega los secrets (DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME).
+""")
+    st.markdown("El ZIP y el PDF del proyecto pueden subirse al repo si necesitas documentación.")
 
-    # Contenido según la opción
-    if seleccion == "Ventas":
-        mostrar_venta()
-    elif seleccion == "Otra opción":
-        st.write("Has seleccionado otra opción.")
-
-else:
-    # Si la sesión no está iniciada, mostrar el login
-    login()
