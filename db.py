@@ -1,34 +1,33 @@
+# db_safe.py (rename to db.py en tu repo)
 import os
 import urllib.parse
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.automap import automap_base
 
-DB_USER = os.getenv("DB_USER")
-DB_PASS = os.getenv("DB_PASS", "")
-DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
-DB_PORT = os.getenv("DB_PORT", "3306")
-DB_NAME = os.getenv("DB_NAME")
+# IMPORTS perezosos para que la app no falle si falta un paquete
+def make_engine():
+    try:
+        from sqlalchemy import create_engine
+    except Exception:
+        raise
+    DB_USER = os.getenv("DB_USER")
+    DB_PASS = urllib.parse.quote_plus(os.getenv("DB_PASS",""))
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT","3306")
+    DB_NAME = os.getenv("DB_NAME")
+    conn = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8mb4"
+    return create_engine(conn, future=True)
 
-DB_PASS_ESC = urllib.parse.quote_plus(DB_PASS)
+# crear metadata/metadata.reflect solo cuando se necesite
+def get_session():
+    from sqlalchemy.orm import sessionmaker
+    engine = make_engine()
+    SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+    return SessionLocal()
 
-CONN = f"mysql+pymysql://{DB_USER}:{DB_PASS_ESC}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8mb4"
-
-engine = create_engine(CONN, echo=False, future=True)
-
-metadata = MetaData()
-metadata.reflect(bind=engine)
-Base = automap_base(metadata=metadata)
-Base.prepare()
-
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-
-def get_table_names():
-    return list(metadata.tables.keys())
-
-def get_table_columns(table_name):
-    tbl = metadata.tables.get(table_name)
-    if not tbl:
-        return []
-    return [c.name for c in tbl.columns]
-
+# utilitarios simples que usan sesiones bajo demanda
+def show_tables():
+    session = get_session()()
+    try:
+        res = session.execute("SHOW TABLES")
+        return [r[0] for r in res.fetchall()]
+    finally:
+        session.close()
