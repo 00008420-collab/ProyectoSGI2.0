@@ -1,31 +1,27 @@
-# app.py (DEBUG)
+# app.py
 import streamlit as st
-st.set_page_config(page_title="Debug GAPC", layout="centered")
-st.title("Debug — Streamlit app running ✅")
+from db import get_table_names_safe
+from auth import show_login_streamlit
 
-import os
-st.subheader("Check environment")
-for k in ["DB_HOST","DB_NAME","DB_USER","DB_PASS","DB_PORT","AUTH_MODE"]:
-    st.write(k, "=", "✓" if os.getenv(k) else "— no definida —")
+st.set_page_config(page_title="GAPC - Sistema", layout="wide")
+st.title("GAPC — Sistema de Gestión")
 
-st.subheader("Check Python modules")
-errors = []
-try:
-    import sqlalchemy
-except Exception as e:
-    errors.append(f"sqlalchemy: {e}")
-try:
-    import pymysql
-except Exception as e:
-    errors.append(f"pymysql: {e}")
-try:
-    import pandas
-except Exception as e:
-    errors.append(f"pandas: {e}")
+# Login simple
+user = show_login_streamlit()
+if not user:
+    st.stop()
 
-if not errors:
-    st.success("Módulos esenciales importados OK")
+# App principal
+st.sidebar.title("Navegación")
+pages = ["Inicio", "Miembros", "Grupos", "Préstamos", "Pagos", "Multas y Reuniones", "Módulo avanzado"]
+choice = st.sidebar.selectbox("Ir a", pages)
+
+if choice == "Inicio":
+    st.header("Inicio — Resumen")
+    st.markdown("Tablas detectadas en la base de datos:")
+    tablas = get_table_names_safe()
+    st.write(tablas)
+
 else:
-    st.error("Error importando módulos (ver abajo)")
-    for e in errors:
-        st.write(e)
+    st.markdown(f"Ve a la barra lateral → `pages/` para abrir los módulos CRUD específicos.")
+    st.info("Las páginas CRUD están disponibles en la carpeta `pages/` y Streamlit las mostrará automáticamente.")
