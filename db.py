@@ -1,4 +1,3 @@
-# db.py
 import os
 import urllib.parse
 from sqlalchemy import create_engine, MetaData
@@ -32,3 +31,4 @@ def get_table_columns(table_name):
     if not tbl:
         return []
     return [c.name for c in tbl.columns]
+
