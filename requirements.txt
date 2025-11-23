@@ -1,7 +1,2 @@
-streamlit==1.26.0
-SQLAlchemy==2.0.19
-pymysql==1.1.0
-pandas==2.2.2
-alembic==1.11.1   # opcional si usas migraciones
-python-dotenv==1.0.0
-bcrypt==4.0.1
+streamlit
+mysql-connector-python
