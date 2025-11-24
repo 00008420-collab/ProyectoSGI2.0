@@ -1,8 +1,8 @@
-streamlit
-mysql-connector-python
+# requirements.txt mínimo y seguro para Streamlit Cloud
 streamlit==1.26.0
+pillow==9.4.0
 SQLAlchemy==2.0.19
 pymysql==1.1.0
 pandas==2.2.2
-python-dotenv==1.0.0 # opcional para autenticación si la necesitas
-bcrypt==4.0.1
+python-dotenv==1.0.0
+mysql-connector-python==8.1.0
